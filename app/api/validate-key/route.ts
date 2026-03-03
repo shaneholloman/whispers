@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const customClient = togetherVercelAiClient(apiKey);
     // Make a simple LLM call to validate the API key
     await generateText({
-      model: customClient("Qwen/Qwen2.5-72B-Instruct-Turbo"),
+      model: customClient("moonshotai/Kimi-K2.5"),
       maxTokens: 100,
       messages: [
         {
