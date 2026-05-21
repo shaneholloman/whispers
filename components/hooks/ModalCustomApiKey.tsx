@@ -3,6 +3,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -111,6 +112,9 @@ export const ModalCustomApiKey = () => {
             <DialogTitle className="text-base font-semibold text-[#101828]">
               Together AI API
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Configure your Together AI API key for custom limits
+            </DialogDescription>
           </div>
         </DialogHeader>
         <div className="flex flex-col items-center w-full px-5 py-6 gap-3">
