@@ -1,6 +1,7 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { clerkClient } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/prisma";
 
 const redis =
   !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN
@@ -70,10 +71,29 @@ function isTogetherUser(email?: string) {
 
 async function getUserEmail(clerkUserId?: string) {
   if (!clerkUserId) return undefined;
+
+  // 1. Check local DB cache first (~1-5 ms with indexed lookup)
+  const cached = await prisma.user.findUnique({
+    where: { clerkId: clerkUserId },
+  });
+  if (cached?.email) {
+    return cached.email;
+  }
+
+  // 2. Cache miss → fetch from Clerk (slow, ~300-400 ms)
   try {
     const client = await clerkClient();
     const user = await client.users.getUser(clerkUserId);
-    return user.emailAddresses?.[0]?.emailAddress;
+    const email = user.emailAddresses?.[0]?.emailAddress;
+
+    if (email) {
+      await prisma.user.upsert({
+        where: { clerkId: clerkUserId },
+        create: { clerkId: clerkUserId, email },
+        update: { email },
+      });
+    }
+    return email;
   } catch {
     return undefined;
   }

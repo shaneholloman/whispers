@@ -53,3 +53,10 @@ model AudioTrack {
 
   @@index([whisperId])
 }
+
+model User {
+  clerkId   String   @id
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
