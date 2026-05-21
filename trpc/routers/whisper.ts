@@ -9,6 +9,7 @@ import {
   togetherVercelAiClient,
 } from "@/lib/apiClients";
 import { generateText } from "ai";
+import { toFile } from "together-ai";
 
 const AUDIO_TO_TEXT_MODEL = "openai/whisper-large-v3";
 
@@ -56,15 +57,58 @@ export const whisperRouter = t.router({
         throw new Error("You have exceeded your daily audio minutes limit.");
       }
 
-      const res = await togetherBaseClientWithKey(
-        ctx.togetherApiKey
-      ).audio.transcriptions.create({
-        file: input.audioUrl,
-        model: AUDIO_TO_TEXT_MODEL,
-        language: input.language || "en",
-      });
+      let transcription: string;
 
-      const transcription = res.text as string;
+      try {
+        const res = await togetherBaseClientWithKey(
+          ctx.togetherApiKey
+        ).audio.transcriptions.create({
+          file: input.audioUrl,
+          model: AUDIO_TO_TEXT_MODEL,
+          language: input.language || "en",
+        });
+        transcription = res.text as string;
+      } catch (err: any) {
+        // Workaround for a TogetherAI backend bug where some audio files fail
+        // during the URL-based splitting pipeline with a 500. Fetch the file
+        // from S3 and upload it directly as a File object instead.
+        if (err?.status !== 500) {
+          throw err;
+        }
+
+        const audioRes = await fetch(input.audioUrl);
+        if (!audioRes.ok) {
+          throw new Error(
+            `Failed to fetch audio from S3 for fallback transcription: ${audioRes.status}`
+          );
+        }
+
+        const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+        const contentType =
+          audioRes.headers.get("content-type") || "audio/mpeg";
+        const extension =
+          contentType === "audio/mp4"
+            ? ".m4a"
+            : contentType === "audio/wav"
+            ? ".wav"
+            : contentType === "audio/webm"
+            ? ".webm"
+            : ".mp3";
+
+        const audioFile = await toFile(audioBuffer, `audio${extension}`, {
+          type: contentType,
+        });
+
+        const res = await togetherBaseClientWithKey(
+          ctx.togetherApiKey
+        ).audio.transcriptions.create({
+          file: audioFile,
+          model: AUDIO_TO_TEXT_MODEL,
+          language: input.language || "en",
+        });
+
+        transcription = res.text as string;
+      }
 
       // Generate a title from the transcription (first 8 words or fallback)
       const { text: title } = await generateText({
