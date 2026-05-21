@@ -11,7 +11,7 @@ import {
 import { generateText } from "ai";
 import { toFile } from "together-ai";
 
-const AUDIO_TO_TEXT_MODEL = "openai/whisper-large-v3";
+const AUDIO_TO_TEXT_MODEL = "nvidia/parakeet-tdt-0.6b-v3";
 
 export const whisperRouter = t.router({
   listWhispers: protectedProcedure.query(async ({ ctx }) => {
@@ -64,6 +64,7 @@ export const whisperRouter = t.router({
           ctx.togetherApiKey
         ).audio.transcriptions.create({
           file: input.audioUrl,
+          // @ts-ignore
           model: AUDIO_TO_TEXT_MODEL,
           language: input.language || "en",
         });
@@ -103,6 +104,7 @@ export const whisperRouter = t.router({
           ctx.togetherApiKey
         ).audio.transcriptions.create({
           file: audioFile,
+          // @ts-ignore
           model: AUDIO_TO_TEXT_MODEL,
           language: input.language || "en",
         });
