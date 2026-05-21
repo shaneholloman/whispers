@@ -23,6 +23,9 @@ model Whisper {
   audioTracks       AudioTrack[]
 
   transformations Transformation[]
+
+  @@index([userId])
+  @@index([userId, createdAt(sort: Desc)])
 }
 
 model Transformation {
@@ -34,6 +37,9 @@ model Transformation {
   text         String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([whisperId])
+  @@index([whisperId, createdAt(sort: Asc)])
 }
 
 model AudioTrack {
@@ -44,4 +50,6 @@ model AudioTrack {
   whisper              Whisper  @relation(fields: [whisperId], references: [id])
   whisperId            String
   language             String? // Added for language selection
+
+  @@index([whisperId])
 }
