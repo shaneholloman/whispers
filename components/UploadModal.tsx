@@ -3,6 +3,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -93,6 +94,9 @@ export function UploadModal({ onClose }: { onClose: () => void }) {
       >
         <DialogHeader className="p-0">
           <DialogTitle className="sr-only">Upload Voice Audio</DialogTitle>
+          <DialogDescription className="sr-only">
+            Upload an audio file to transcribe
+          </DialogDescription>
         </DialogHeader>
 
         {isProcessing !== "idle" ? (
