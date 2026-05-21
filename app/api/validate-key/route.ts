@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     // Make a simple LLM call to validate the API key
     await generateText({
       model: customClient("moonshotai/Kimi-K2.5"),
-      maxTokens: 100,
+      maxOutputTokens: 100,
       messages: [
         {
           role: "user",

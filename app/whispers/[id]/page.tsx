@@ -1,6 +1,6 @@
 import TranscriptionPageClient from "./TranscriptionPageClient";
 import { Metadata } from "next";
-import { PrismaClient } from "@/lib/generated/prisma";
+import { prisma } from "@/lib/prisma";
 
 export async function generateMetadata({
   params,
@@ -8,12 +8,10 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const prisma = new PrismaClient();
   const whisper = await prisma.whisper.findUnique({
     where: { id },
     select: { title: true, fullTranscription: true },
   });
-  await prisma.$disconnect();
   if (!whisper) {
     return {
       title: "Whisper Not Found",

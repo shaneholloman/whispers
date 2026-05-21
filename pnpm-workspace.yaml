@@ -1,0 +1,13 @@
+minimumReleaseAgeExclude:
+  - '@ai-sdk/gateway@3.0.118'
+  - '@clerk/backend@3.4.12'
+  - '@clerk/nextjs@7.4.0'
+  - '@clerk/react@6.7.0'
+  - '@clerk/shared@4.13.0'
+  - ai@6.0.189
+allowBuilds:
+  '@clerk/shared': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  prisma: true
+  sharp: true

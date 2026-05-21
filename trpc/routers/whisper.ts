@@ -1,6 +1,6 @@
 import { t } from "../init";
 import { z } from "zod";
-import { PrismaClient } from "../../lib/generated/prisma";
+import { prisma } from "@/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { protectedProcedure } from "../init";
 import { limitMinutes } from "@/lib/limits";
@@ -10,7 +10,7 @@ import {
 } from "@/lib/apiClients";
 import { generateText } from "ai";
 
-const prisma = new PrismaClient();
+const AUDIO_TO_TEXT_MODEL = "openai/whisper-large-v3";
 
 export const whisperRouter = t.router({
   listWhispers: protectedProcedure.query(async ({ ctx }) => {
@@ -59,9 +59,8 @@ export const whisperRouter = t.router({
       const res = await togetherBaseClientWithKey(
         ctx.togetherApiKey
       ).audio.transcriptions.create({
-        // @ts-ignore: Together API accepts file URL as string, even if types do not allow
         file: input.audioUrl,
-        model: "openai/whisper-large-v3",
+        model: AUDIO_TO_TEXT_MODEL,
         language: input.language || "en",
       });
 
@@ -77,7 +76,7 @@ export const whisperRouter = t.router({
         model: togetherVercelAiClient(ctx.togetherApiKey)(
           "meta-llama/Llama-3.3-70B-Instruct-Turbo"
         ),
-        maxTokens: 10,
+        maxOutputTokens: 10,
       });
 
       const whisperId = input.whisperId || uuidv4();

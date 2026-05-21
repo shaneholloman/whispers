@@ -19,16 +19,15 @@ export function TogetherApiKeyProvider({
   const [apiKey, setApiKeyState] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    setApiKeyState(sessionStorage.getItem("togetherApiKey") || undefined);
+    setApiKeyState(localStorage.getItem("togetherApiKey") || undefined);
   }, []);
 
-  // Sync to sessionStorage and notify listeners
   const setApiKey = (key: string | undefined) => {
     setApiKeyState(key);
     if (key) {
-      sessionStorage.setItem("togetherApiKey", key);
+      localStorage.setItem("togetherApiKey", key);
     } else {
-      sessionStorage.removeItem("togetherApiKey");
+      localStorage.removeItem("togetherApiKey");
     }
   };
 

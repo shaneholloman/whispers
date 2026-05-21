@@ -104,7 +104,7 @@ export const ModalCustomApiKey = () => {
         <DialogHeader className="w-full flex flex-col items-center p-0">
           <div className="flex items-center justify-start w-full p-5 relative border-b border-gray-200">
             <img
-              src="/square-logo.png"
+              src="/square-logo.svg"
               alt="Logo"
               className="w-5 h-5 rounded-[3px] mr-2"
             />

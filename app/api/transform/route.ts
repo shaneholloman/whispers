@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { PrismaClient } from "@/lib/generated/prisma";
+import { prisma } from "@/lib/prisma";
 import { streamText } from "ai";
 import { togetherVercelAiClient } from "@/lib/apiClients";
 import { RECORDING_TYPES } from "@/lib/utils";
@@ -8,7 +8,6 @@ import { getAuth } from "@clerk/nextjs/server";
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
-  const prisma = new PrismaClient();
   const body = await req.json();
   const { whisperId, typeName } = body;
   // Auth

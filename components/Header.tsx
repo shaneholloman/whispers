@@ -4,11 +4,10 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { Button } from "./ui/button";
 import {
-  SignedIn,
-  SignedOut,
   SignInButton,
   SignUpButton,
   UserButton,
+  useAuth,
   useUser,
 } from "@clerk/nextjs";
 import Link from "next/link";
@@ -19,7 +18,8 @@ import { useLimits } from "./hooks/useLimits";
 
 export function Header() {
   const pathname = usePathname();
-  const { user } = useUser();
+  const { user, isLoaded: userIsLoaded } = useUser();
+  const { isSignedIn } = useAuth();
   const [mounted, setMounted] = React.useState(false);
   const { apiKey } = useTogetherApiKey();
 
@@ -68,49 +68,52 @@ export function Header() {
         </Link>
       )}
       <div className="flex items-center gap-2">
-        <SignedOut>
-          <SignInButton>
-            <Button variant="ghost">Login</Button>
-          </SignInButton>
-          <SignUpButton>
-            <Button className="font-medium">Sign up</Button>
-          </SignUpButton>
-        </SignedOut>
-        <SignedIn>
-          <Button
-            className="w-[51px] h-[30px] relative rounded-lg bg-white hover:bg-gray-50 border-[0.5px] border-gray-200"
-            onClick={() => {
-              if (isBYOK) {
-                toast("You have unlimited transformations for your whispers!");
-              } else if (!isLoading) {
-                toast(
-                  `You got ${
-                    transformationsData?.remaining ?? 0
-                  } transformations left for your whispers`
-                );
-              }
-            }}
-          >
-            <img src="/spark.svg" className="size-4 min-w-4" />
-            <p className="text-sm font-medium text-left text-[#1e2939]">
-              {isBYOK
-                ? "∞"
-                : isLoading
-                ? "..."
-                : transformationsData?.remaining ?? 0}
-            </p>
-          </Button>
-          <KeyButton />
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: {
-                  img: "rounded-[8px]",
+        {!isSignedIn ? (
+          <>
+            <SignInButton>
+              <Button variant="ghost">Login</Button>
+            </SignInButton>
+            <SignUpButton>
+              <Button className="font-medium">Sign up</Button>
+            </SignUpButton>
+          </>
+        ) : (
+          <>
+            <Button
+              className="w-[51px] h-[30px] relative rounded-lg bg-white hover:bg-gray-50 border-[0.5px] border-gray-200"
+              onClick={() => {
+                if (isBYOK) {
+                  toast("You have unlimited transformations for your whispers!");
+                } else if (!isLoading) {
+                  toast(
+                    `You got ${
+                      transformationsData?.remaining ?? 0
+                    } transformations left for your whispers`
+                  );
+                }
+              }}
+            >
+              <img src="/spark.svg" className="size-4 min-w-4" />
+              <p className="text-sm font-medium text-left text-[#1e2939]">
+                {isBYOK
+                  ? "∞"
+                  : isLoading
+                  ? "..."
+                  : transformationsData?.remaining ?? 0}
+              </p>
+            </Button>
+            <KeyButton />
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: {
+                    img: "rounded-[8px]",
+                  },
                 },
-              },
-            }}
-          />
-        </SignedIn>
+              }}
+            />
+          </>
+        )}
       </div>
       <ModalCustomApiKey />
     </header>

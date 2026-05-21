@@ -27,14 +27,14 @@ export function LandingPage() {
             href="https://togetherai.link/"
             rel="noopener noreferrer"
             target="_blank"
-            className="w-[225px] h-[30px] relative rounded-[100px] bg-gradient-to-r from-neutral-100 to-white border border-gray-200 flex items-center justify-center gap-1 mb-6"
+            className="w-[245px] h-[30px] relative rounded-[100px] bg-gradient-to-r from-neutral-100 to-white border border-gray-200 flex items-center justify-center gap-1 mb-6"
           >
             <span className="text-sm text-left text-[#4a5565]">
               Made & powered by{" "}
             </span>
             <img
-              src="/togetherai.svg"
-              className="min-w-[70px] min-h-[11px] mt-0.5"
+              src="/togetherai.png"
+              className="min-w-[70px] h-[18px] mt-0.5"
             />
           </a>
 
