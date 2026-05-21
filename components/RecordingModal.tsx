@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -138,6 +139,9 @@ export function RecordingModal({ onClose }: RecordingModalProps) {
       >
         <DialogHeader className="p-0">
           <DialogTitle className="sr-only">Recording Modal</DialogTitle>
+          <DialogDescription className="sr-only">
+            Record audio directly in your browser
+          </DialogDescription>
         </DialogHeader>
 
         {isProcessing !== "idle" ? (
