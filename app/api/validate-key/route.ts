@@ -1,7 +1,17 @@
 import { togetherVercelAiClient } from "@/lib/apiClients";
 import { generateText } from "ai";
+import { getAuth } from "@clerk/nextjs/server";
+import { NextRequest } from "next/server";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const auth = getAuth(request);
+  if (!auth?.userId) {
+    return new Response(JSON.stringify({ message: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const { apiKey } = await request.json();
 
   if (!apiKey) {

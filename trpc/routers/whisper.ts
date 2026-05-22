@@ -133,6 +133,7 @@ export const whisperRouter = t.router({
           where: { id: input.whisperId },
         });
         if (!whisper) throw new Error("Whisper not found");
+        if (whisper.userId !== ctx.auth.userId) throw new Error("Unauthorized");
         // Create new AudioTrack
         await prisma.audioTrack.create({
           data: {
@@ -173,7 +174,7 @@ export const whisperRouter = t.router({
     }),
   getWhisperWithTracks: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const whisper = await prisma.whisper.findUnique({
         where: { id: input.id },
         include: {
@@ -182,6 +183,7 @@ export const whisperRouter = t.router({
         },
       });
       if (!whisper) throw new Error("Whisper not found");
+      if (whisper.userId !== ctx.auth.userId) throw new Error("Unauthorized");
       return whisper;
     }),
   updateFullTranscription: protectedProcedure

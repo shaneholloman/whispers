@@ -27,6 +27,11 @@ export async function POST(req: NextRequest) {
       status: 404,
     });
   }
+  if (whisper.userId !== auth.userId) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+    });
+  }
 
   // Create transformation in DB
   const transformation = await prisma.transformation.create({
