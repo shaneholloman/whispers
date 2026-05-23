@@ -13,6 +13,8 @@ import { toFile } from "together-ai";
 
 const AUDIO_TO_TEXT_MODEL = "nvidia/parakeet-tdt-0.6b-v3";
 
+const OLD_AUDIO_TO_TEXT_MODEL = "openai/whisper-large-v3";
+
 export const whisperRouter = t.router({
   listWhispers: protectedProcedure.query(async ({ ctx }) => {
     const whispers = await prisma.whisper.findMany({
