@@ -1,5 +1,4 @@
-import { Together, toFile } from "together-ai";
-import { readFileSync } from "fs";
+import { Together } from "together-ai";
 
 const MODELS = [
   { name: "nvidia/parakeet-tdt-0.6b-v3", label: "NEW  (parakeet-tdt-0.6b-v3)" },
@@ -7,8 +6,8 @@ const MODELS = [
 ];
 
 const AUDIO_FILES = [
-  "./public/Andrej_Karpathy_From_Vibe_Coding.mp3",
-  "./public/Skill_Issue_Andrej_Karpathy.mp3",
+  "https://whisper-test.t3.tigrisfiles.io/Andrej_Karpathy_From_Vibe_Coding.mp3",
+  "https://whisper-test.t3.tigrisfiles.io/Skill_Issue_Andrej_Karpathy.mp3",
 ];
 const RUNS = 5;
 
@@ -33,47 +32,50 @@ async function transcribe(model, audioFile) {
 
 console.log(`Runs per model per file: ${RUNS}\n`);
 
-for (const audioPath of AUDIO_FILES) {
-  const fileName = audioPath.split("/").pop();
+for (const audioUrl of AUDIO_FILES) {
+  const fileName = audioUrl.split("/").pop();
   console.log("═".repeat(70));
   console.log(`FILE: ${fileName}`);
-
-  const buffer = readFileSync(audioPath);
-  const audioFile = await toFile(buffer, "audio.mp3", { type: "audio/mpeg" });
-  console.log(`Size: ${(buffer.length / 1024 / 1024).toFixed(1)} MB`);
+  console.log(`URL:  ${audioUrl}`);
   console.log("─".repeat(70));
 
-  const results = {};
-
-  for (const { name, label } of MODELS) {
-    console.log(`\nModel: ${label}`);
+  async function runModel({ name, label }) {
+    const logs = [];
     const times = [];
     let lastText = "";
-
     let errors = 0;
+
     for (let i = 1; i <= RUNS; i++) {
-      process.stdout.write(`  Run ${i}/${RUNS} ... `);
-      const result = await transcribe(name, audioFile);
+      const result = await transcribe(name, audioUrl);
       if (result.ok) {
         times.push(result.elapsed);
         lastText = result.text;
-        console.log(`${result.elapsed.toFixed(2)}s`);
+        logs.push(`  [${label.trim()}] Run ${i}/${RUNS} ... ${result.elapsed.toFixed(2)}s`);
       } else {
         errors++;
-        console.log(`ERROR (${result.elapsed.toFixed(2)}s) — ${result.error}`);
+        logs.push(`  [${label.trim()}] Run ${i}/${RUNS} ... ERROR (${result.elapsed.toFixed(2)}s) — ${result.error}`);
       }
     }
 
+    let stat;
     if (times.length === 0) {
-      results[name] = { label, avg: null, min: null, max: null, stddev: null, errors, sample: "all runs failed" };
+      stat = { label, avg: null, min: null, max: null, stddev: null, errors, sample: "all runs failed" };
     } else {
       const avg = times.reduce((a, b) => a + b, 0) / times.length;
       const min = Math.min(...times);
       const max = Math.max(...times);
       const stddev = Math.sqrt(times.map(t => (t - avg) ** 2).reduce((a, b) => a + b, 0) / times.length);
-      results[name] = { label, avg, min, max, stddev, errors, sample: lastText.slice(0, 120) };
+      stat = { label, avg, min, max, stddev, errors, sample: lastText.slice(0, 120) };
     }
+    return { name, stat, logs };
   }
+
+  console.log(`\nRunning both models in parallel...`);
+  const allResults = await Promise.all(MODELS.map(runModel));
+
+  for (const { logs } of allResults) logs.forEach(l => console.log(l));
+
+  const results = Object.fromEntries(allResults.map(({ name, stat }) => [name, stat]));
 
   console.log("\n" + "─".repeat(70));
   console.log("SUMMARY\n");
